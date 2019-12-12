@@ -13,7 +13,7 @@ if (NOT VTK_FOUND)
 endif()
 
 message (STATUS "VTK_VERSION: ${VTK_VERSION}")
-message (STATUS "VTK_DIR: ${VTK_DIR}")
+#message (STATUS "VTK_DIR: ${VTK_DIR}")
 
 set(EXE_SOURCES
   src/options.cpp
@@ -34,6 +34,8 @@ include_directories(
 #link_directories(${VTK_LIBRARY_DIRS})
 #message (STATUS "VTK_LIBRARY_DIRS: ${VTK_LIBRARY_DIRS}")
 
+
+
 if (VTK_VERSION VERSION_LESS "8.90.0")
   # old system
   include(${VTK_USE_FILE})
@@ -49,3 +51,5 @@ else ()
     MODULES ${VTK_LIBRARIES}
     )
 endif () 
+
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
