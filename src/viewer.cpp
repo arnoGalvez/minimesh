@@ -1,11 +1,12 @@
 #include "viewer.hpp"
 
+#include "import.hpp"
+
 #include <algorithm>
 #include <array>
 #include <iostream>
 #include <string>
 #include <vtkActor.h>
-#include <vtkAppendFilter.h>
 #include <vtkCamera.h>
 #include <vtkDataSetMapper.h>
 #include <vtkNamedColors.h>
@@ -13,19 +14,10 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
-#include <vtkSphereSource.h>
-#include <vtkUnstructuredGridReader.h>
-#include <vtkXMLUnstructuredGridReader.h>
 
 Viewer::Viewer() {}
 
-Viewer &Viewer::Instance()
-{
-    static Viewer instance;
-    return instance;
-}
-
-void Viewer::View( std::string const &fileName )
+void Viewer::ViewDataSet( vtkDataSet *dataSet )
 {
     auto colors = vtkSmartPointer<vtkNamedColors>::New();
 
@@ -41,12 +33,9 @@ void Viewer::View( std::string const &fileName )
     renderer->SetBackground( colors->GetColor3d( "Wheat" ).GetData() );
     renderer->UseHiddenLineRemovalOn();
 
-    std::cout << "Loading: " << fileName << std::endl;
-    auto unstructuredGrid = ReadUnstructuredGrid( fileName );
-
     // Visualize
     auto mapper = vtkSmartPointer<vtkDataSetMapper>::New();
-    mapper->SetInputData( unstructuredGrid );
+    mapper->SetInputData( dataSet );
     mapper->ScalarVisibilityOff();
 
     auto backProp = vtkSmartPointer<vtkProperty>::New();
@@ -61,46 +50,34 @@ void Viewer::View( std::string const &fileName )
     actor->GetProperty()->SetSpecular( .3 );
     actor->GetProperty()->SetSpecularPower( 30 );
     actor->GetProperty()->EdgeVisibilityOn();
+
     renderer->AddActor( actor );
     renderer->GetActiveCamera()->Azimuth( 45 );
     renderer->GetActiveCamera()->Elevation( 45 );
     renderer->ResetCamera();
+    interactor->Initialize();
     renderWindow->Render();
     interactor->Start();
 }
 
-vtkSmartPointer<vtkUnstructuredGrid> Viewer::ReadUnstructuredGrid( std::string const &fileName )
+/* This code is almost a 1:1 copy from https://lorensen.github.io/VTKExamples/site/Cxx/IO/ReadAllUnstructuredGridTypes/
+ */
+
+Viewer &Viewer::Instance()
 {
-    vtkSmartPointer<vtkUnstructuredGrid> unstructuredGrid;
-    std::string                          extension = "";
-    if ( fileName.find_last_of( "." ) != std::string::npos )
-    { extension = fileName.substr( fileName.find_last_of( "." ) ); }
+    static Viewer instance;
+    return instance;
+}
 
-    // Drop the case of the extension
-    std::transform( extension.begin(), extension.end(), extension.begin(), ::tolower );
+void Viewer::View( std::string const &fileName )
+{
+    std::cout << "Loading: " << fileName << std::endl;
+    auto unstructuredGrid = ReadUnstructuredGrid( fileName );
 
-    if ( extension == ".vtu" )
-    {
-        auto reader = vtkSmartPointer<vtkXMLUnstructuredGridReader>::New();
-        reader->SetFileName( fileName.c_str() );
-        reader->Update();
-        unstructuredGrid = reader->GetOutput();
-    }
-    else if ( extension == ".vtk" )
-    {
-        auto reader = vtkSmartPointer<vtkUnstructuredGridReader>::New();
-        reader->SetFileName( fileName.c_str() );
-        reader->Update();
-        unstructuredGrid = reader->GetOutput();
-    }
-    else
-    {
-        auto source = vtkSmartPointer<vtkSphereSource>::New();
-        source->Update();
-        auto appendFilter = vtkSmartPointer<vtkAppendFilter>::New();
-        appendFilter->AddInputData( source->GetOutput() );
-        appendFilter->Update();
-        unstructuredGrid = appendFilter->GetOutput();
-    }
-    return unstructuredGrid;
+    ViewDataSet( unstructuredGrid );
+}
+
+void Viewer::View( vtkSmartPointer<vtkPolyData> polyData )
+{
+    ViewDataSet( polyData );
 }

@@ -19,6 +19,7 @@ set(EXE_SOURCES
   src/options.cpp
   src/viewer.cpp
   src/import.cpp
+  src/concatenate.cpp
   # Add other source files here, one by line
 )
 

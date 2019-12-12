@@ -2,11 +2,15 @@
 
 #include <memory>
 
+#include <vtkSmartPointer.h>
+#include <vtkPolyData.h>
+
 #include "cpptoml.h"
 
 class OptionsParser
 {
 public:
+
   OptionsParser(const std::string&);
   ~OptionsParser(void) {}
 

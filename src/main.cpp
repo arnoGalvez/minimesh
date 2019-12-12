@@ -1,5 +1,6 @@
 #include "options.hpp"
 #include "viewer.hpp"
+#include "import.hpp"
 
 #include <cstdlib>
 #include <iostream>
@@ -57,6 +58,15 @@ int main( int argc, char **argv )
         /*auto params = */ op->parse();
         delete op;
     }
+    /*else if (command == "-c" || command == "--concatenate")
+    {
+        std::vector<std::string>(argc - 2);
+        for (int i = 2; i < argc; ++i)
+        {
+            std::string file(argv[i]);
+
+        }
+    }*/
     else
     {
         std::cerr << "Error: unknown command\n";

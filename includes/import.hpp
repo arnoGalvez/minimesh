@@ -1,8 +1,8 @@
-#include <vtkUnstructuredGridReader.h>
-
-#include <memory>
 #include <string>
+#include <vtkPolyData.h>
+#include <vtkSmartPointer.h>
+#include <vtkUnstructuredGridReader.h>
+#include <vtkXMLUnstructuredGridReader.h>
 
-namespace import {
-    std::shared_ptr<vtkUnstructuredGrid> GridReader(std::string const &file);
-}
+vtkSmartPointer<vtkPolyData>         ReadPolyData( const std::string &file );
+vtkSmartPointer<vtkUnstructuredGrid> ReadUnstructuredGrid( std::string const &fileName );
