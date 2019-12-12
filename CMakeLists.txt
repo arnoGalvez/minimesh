@@ -1,9 +1,26 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
 
 project(minimesh
 	LANGUAGES CXX
 	VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 11)
+
+find_package(VTK REQUIRED)
+
+if (NOT VTK_FOUND)
+  message(FATAL_ERROR "Minimesh fatal error : ${VTK_NOT_FOUND_MESSAGE}")
+  return ()
+endif()
+
+message (STATUS "VTK_VERSION: ${VTK_VERSION}")
+message (STATUS "VTK_DIR: ${VTK_DIR}")
+
+set(EXE_SOURCES
+  src/options.cpp
+  src/viewer.cpp
+  src/import.cpp
+  # Add other source files here, one by line
+)
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/includes
@@ -11,29 +28,22 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/tests
 )
 
-set(EXE_SOURCES
-  src/options.cpp
-  # Add other source files here, one by line
-)
+#set(VTK_LIBRARY_DIRS "C:/MyProjects/VTK-8.2.0/out/build/x64-Debug/bin")
+#link_directories(${VTK_LIBRARY_DIRS})
+#message (STATUS "VTK_LIBRARY_DIRS: ${VTK_LIBRARY_DIRS}")
 
-add_executable(${PROJECT_NAME} src/main.cpp ${EXE_SOURCES})
-
-set(VTK_DIR "${VTK_INSTALL_DIR}/lib/cmake/vtk-8.2")
-find_package(VTK REQUIRED)
-include(${VTK_USE_FILE})
-
-target_link_libraries(${PROJECT_NAME} ${VTK_LIBRARIES})
-
-install(TARGETS minimesh DESTINATION bin)
-
-# Unit tests
-#set(GTEST_ROOT "${GOOGLETEST_INSTALL_DIR}")
-#find_package(GTest REQUIRED)
-
-#add_executable(test_minimesh tests/unit_tests.cpp tests/test_suite.hpp ${EXE_SOURCES})
-#target_link_libraries(test_minimesh ${VTK_LIBRARIES} GTest::GTest pthread)
-
-#add_test(
-#  NAME merge
-#  COMMAND test_minimesh
-#)
+if (VTK_VERSION VERSION_LESS "8.90.0")
+  # old system
+  include(${VTK_USE_FILE})
+  add_executable(${PROJECT_NAME} src/main.cpp ${EXE_SOURCES})
+  target_link_libraries(${PROJECT_NAME} PRIVATE ${VTK_LIBRARIES})
+else ()
+  # include all components
+  add_executable(${PROJECT_NAME} src/main.cpp ${EXE_SOURCES})
+  target_link_libraries(${PROJECT_NAME} PRIVATE ${VTK_LIBRARIES})
+  # vtk_module_autoinit is needed
+  vtk_module_autoinit(
+    TARGETS main
+    MODULES ${VTK_LIBRARIES}
+    )
+endif () 
