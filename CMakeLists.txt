@@ -20,6 +20,7 @@ set(EXE_SOURCES
   src/viewer.cpp
   src/import.cpp
   src/concatenate.cpp
+  src/job.cpp
   # Add other source files here, one by line
 )
 

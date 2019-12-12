@@ -13,7 +13,7 @@ OptionsParser::OptionsParser( const std::string &file_name )
     m_data = cpptoml::parse_file( m_file_name );
 }
 
-void OptionsParser::parse( void )
+std::shared_ptr<Job> OptionsParser::parse( void )
 {
     auto transform = m_data->get_table( "transform" );
     auto name      = *transform->get_as<std::string>( "name" );
@@ -26,28 +26,7 @@ void OptionsParser::parse( void )
         std::vector<std::string> meshes           = *io->get_array_of<std::string>( "inputs" );
         std::string              result_file_name = *io->get_as<std::string>( "output" );
 
-        if ( meshes.size() > 0 )
-        {
-            auto unstructuredGrid = ReadUnstructuredGrid( meshes[0] );
-            auto geometryFilter   = vtkSmartPointer<vtkGeometryFilter>::New();
-            geometryFilter->SetInputData( unstructuredGrid );
-            geometryFilter->Update();
-            auto polyData = vtkSmartPointer<vtkPolyData>( geometryFilter->GetOutput() );
-
-            for ( auto iter = ( meshes.cbegin() + 1 ); iter != meshes.cend(); ++iter )
-            {
-                unstructuredGrid = ReadUnstructuredGrid( *iter );
-                geometryFilter   = vtkSmartPointer<vtkGeometryFilter>::New();
-                geometryFilter->SetInputData( unstructuredGrid );
-                geometryFilter->Update();
-                auto polyData2 = vtkSmartPointer<vtkPolyData>( geometryFilter->GetOutput() );
-
-                polyData = Concatenate( polyData, polyData2, merge_nodes );
-            }
-
-            auto &viewer = Viewer::Instance();
-            viewer.View( polyData );
-        }
+        return std::shared_ptr<MergeJob>( new MergeJob( meshes, result_file_name, merge_nodes ) );
 
         auto quality         = m_data->get_table( "quality" );
         bool compute_quality = *quality->get_as<bool>( "compute_quality" );
@@ -62,8 +41,11 @@ void OptionsParser::parse( void )
 
         auto quality         = m_data->get_table( "quality" );
         bool compute_quality = *quality->get_as<bool>( "compute_quality" );
+
+        return std::shared_ptr<TranslateJob>( new TranslateJob );
     }
     else
     {
+        return std::shared_ptr<Job>( new Job );
     }
 }

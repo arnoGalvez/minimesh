@@ -54,9 +54,10 @@ int main( int argc, char **argv )
             return EXIT_FAILURE;
         }
         file_name = argv[2];
-        auto op   = new OptionsParser( file_name );
-        /*auto params = */ op->parse();
-        delete op;
+        OptionsParser op( file_name );
+        auto params = op.parse();
+        params->Execute();
+        
     }
     /*else if (command == "-c" || command == "--concatenate")
     {

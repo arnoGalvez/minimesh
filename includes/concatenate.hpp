@@ -1,9 +1,12 @@
 #pragma once
 
 #include <string>
-#include <vtkSmartPointer.h>
+#include <vector>
 #include <vtkPolyData.h>
+#include <vtkSmartPointer.h>
 
 vtkSmartPointer<vtkPolyData> Concatenate( vtkSmartPointer<vtkPolyData> lhs,
-                                     vtkSmartPointer<vtkPolyData> rhs,
-                                     bool                         mergeDuplicates = true );
+                                          vtkSmartPointer<vtkPolyData> rhs,
+                                          bool                         mergeDuplicates = true );
+
+vtkSmartPointer<vtkPolyData> Concatenate( std::vector<vtkSmartPointer<vtkPolyData>> data, bool mergeDuplicates = true );
